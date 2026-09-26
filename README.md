@@ -684,7 +684,6 @@ This is a **hackathon build**, not a production deployment.
 
 Known limitations include:
 
-- Authentication enforcement may be disabled in the demo frontend configuration.
 - Role-based authorization is not yet fully enforced at every API operation.
 - Multi-warehouse support exists in the data model, but the demo uses a limited seed dataset.
 - Batch/lot and expiry tracking are currently out of scope.
@@ -747,6 +746,6 @@ Move History + Dashboard
 
 **Every unit of stock movement, traceable to a document, location, user, and timestamp.**
 
-Built for the **Odoo Virtual Hackathon** 🚀
+
 
 </div>
