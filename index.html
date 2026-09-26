@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="StockSense sign in — warehouse staff and administrator access">
+<meta name="theme-color" content="#b9790a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>StockSense — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0efe9; --panel: #ffffff; --ink: #171a1f; --muted: #6d6a60; --border: #dcd8cc;
+    --road: #1b1e22; --road-ink: #ece8dd;
+    --amber: #b9790a; --amber-ink: #171a1f; --good: #256b45; --bad: #a3352b;
+    --mono: "IBM Plex Mono", ui-monospace, monospace; --sans: "IBM Plex Sans", -apple-system, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171b; --panel: #1c2024; --ink: #ece8dd; --muted: #9a978c; --border: #2c3036;
+      --road: #0f1113; --road-ink: #ece8dd; --amber: #e6a534; --amber-ink: #14171b; --good: #4caf7d; --bad: #e0685c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171b; --panel: #1c2024; --ink: #ece8dd; --muted: #9a978c; --border: #2c3036;
+    --road: #0f1113; --road-ink: #ece8dd; --amber: #e6a534; --amber-ink: #14171b; --good: #4caf7d; --bad: #e0685c;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  .screen { min-height: 100vh; min-height: 100%; display: grid; grid-template-columns: 1.1fr 1fr; }
+  .stage {
+    position: relative; overflow: hidden; background: var(--road); color: var(--road-ink);
+    padding: 32px; display: flex; flex-direction: column; justify-content: flex-end;
+    background-image: radial-gradient(#ffffff14 1px, transparent 1px); background-size: 18px 18px;
+  }
+  .stage .heading { font-size: 27px; font-weight: 700; max-width: 20ch; margin-bottom: 8px; line-height: 1.25; }
+  .stage .sub { font-family: var(--mono); font-size: 12.5px; color: #ffffff99; max-width: 32ch; }
+  .form-side { display: flex; align-items: center; justify-content: center; padding: 32px 28px; }
+  .card { width: 100%; max-width: 380px; }
+  .brand { font-weight: 700; font-size: 18px; margin-bottom: 22px; }
+  .role-toggle { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; margin-bottom: 22px; }
+  .role-toggle button {
+    flex: 1; padding: 10px; border: 0; background: var(--panel); color: var(--muted);
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+  }
+  .role-toggle button.active { color: var(--ink); border-bottom-color: var(--amber); background: color-mix(in srgb, var(--amber) 8%, var(--panel)); }
+  h1.title { font-size: 20px; margin: 0 0 4px; }
+  p.hint { font-size: 12.5px; color: var(--muted); margin: 0 0 18px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+  .field input {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 13.5px;
+  }
+  .field input:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+  button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .btn {
+    width: 100%; padding: 10px; border: 1px solid var(--amber); border-radius: 6px;
+    background: var(--amber); color: var(--amber-ink); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer;
+  }
+  .btn[disabled] { opacity: .55; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--border); margin-top: 8px; }
+  .switch-line { margin-top: 14px; font-size: 12.5px; color: var(--muted); text-align: center; }
+  .switch-line button { background: none; border: 0; color: var(--amber); font: inherit; font-weight: 600; cursor: pointer; padding: 0; }
+  .msg { font-size: 12.5px; padding: 9px 10px; border-radius: 6px; margin-bottom: 14px; }
+  .msg.error { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+  .msg.ok { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good); }
+  .msg.otp { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber-ink); font-family: var(--mono); }
+  .success-panel { text-align: center; }
+  .success-panel .glyph { font-size: 34px; margin-bottom: 8px; }
+  .storage-note { font-size: 10.5px; color: var(--muted); text-align: center; margin-top: 10px; font-family: var(--mono); }
+  @media (max-width: 760px) {
+    .screen { grid-template-columns: 1fr; }
+    .stage { min-height: 220px; padding: 22px; }
+    .stage .sub { margin-bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="screen">
+  <section class="stage" id="stage" aria-hidden="true"></section>
+  <section class="form-side">
+    <div class="card">
+      <div class="brand">📦 StockSense</div>
+      <div class="role-toggle" role="tablist" aria-label="Sign in as">
+        <button type="button" data-role="staff" id="roleStaffBtn">Warehouse Staff</button>
+        <button type="button" data-role="admin" id="roleAdminBtn">Administrator</button>
+      </div>
+      <div id="authArea"></div>
+      <div class="storage-note" id="storageNote"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   CONFIG — the only line you need to change when you deploy the backend.
+   Local dev: leave as-is if running `npm run dev` in /backend on port 4000.
+   Production: set this to your deployed backend's URL, e.g.
+   "https://stocksense-api.onrender.com"
+   ========================================================================= */
+const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? "http://localhost:4000"
+  : "https://YOUR-BACKEND-URL-HERE";
+
+const DASHBOARD_URL = "https://claude.ai/artifact/NL38wL8ixcrKhoNfzGdsfR";
+const SESSION_KEY = "stocksense_session_v1";
+
+async function api(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  let data = {};
+  try { data = await res.json(); } catch (e) { /* empty body */ }
+  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+  return data;
+}
+
+/* =========================================================================
+   SESSION — after the backend verifies the user, it hands back a signed
+   JWT. We store it (so a refresh keeps the user signed in) and pass the
+   user's info to the Inventory Dashboard artifact via the URL fragment
+   (never the query string, so it never hits a server log), as
+   #session=<base64 JSON>. The dashboard reads location.hash on load,
+   decodes it, and keeps its own copy.
+   ========================================================================= */
+function saveSession(token, user) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify({ token, user })); } catch (e) {}
+}
+function buildSessionFragment(token, user) {
+  const payload = { token, name: user.name, email: user.email, role: user.role, issuedAt: Date.now() };
+  return btoa(encodeURIComponent(JSON.stringify(payload)));
+}
+function dashboardUrlFor(token, user) {
+  return DASHBOARD_URL + "#session=" + buildSessionFragment(token, user);
+}
+
+/* =========================================================================
+   STAGE COPY
+   ========================================================================= */
+const STAGE_COPY = {
+  staff: { heading: "Pick, pack, shelve — from your phone.", sub: "Warehouse floor access: transfers, deliveries, counts." },
+  admin: { heading: "Run the whole operation from one screen.", sub: "Full inventory access: reporting, setup, and every warehouse." }
+};
+function renderStage(role) {
+  const stage = document.getElementById("stage");
+  const copy = STAGE_COPY[role];
+  stage.innerHTML = `<div class="heading">${copy.heading}</div><div class="sub">${copy.sub}</div>`;
+}
+
+/* =========================================================================
+   ROUTER
+   views: login, otp-login, otp-login-code, signup, forgot, reset, success
+   ========================================================================= */
+let role = "staff";
+let view = "login";
+let pendingEmail = null;
+let message = null;
+let lastSession = null; // { token, user }
+let busy = false;
+
+function setRole(nextRole) {
+  role = nextRole; view = "login"; message = null;
+  document.getElementById("roleStaffBtn").classList.toggle("active", role === "staff");
+  document.getElementById("roleAdminBtn").classList.toggle("active", role === "admin");
+  renderStage(role);
+  renderAuth();
+}
+
+function msgHtml() { return message ? `<div class="msg ${message.type}">${message.text}</div>` : ""; }
+
+function viewLogin() {
+  return `
+    <h1 class="title">${role === "admin" ? "Administrator sign in" : "Staff sign in"}</h1>
+    <p class="hint">${role === "admin" ? "Full access to setup, reporting, and every warehouse." : "Access receipts, deliveries, transfers, and counts."}</p>
+    ${msgHtml()}
+    <form data-form="login">
+      <div class="field"><label for="li-email">Email</label><input id="li-email" name="email" type="email" required></div>
+      <div class="field"><label for="li-password">Password</label><input id="li-password" name="password" type="password" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Signing in…" : "Sign in"}</button>
+    </form>
+    <div class="switch-line"><button type="button" data-nav="otp-login">Sign in with a code instead</button></div>
+    <div class="switch-line"><button type="button" data-nav="forgot">Forgot password?</button></div>
+    <div class="switch-line">No account? <button type="button" data-nav="signup">Create one</button></div>
+  `;
+}
+function viewOtpLogin() {
+  return `
+    <h1 class="title">Sign in with a code</h1>
+    <p class="hint">We'll email a 6-digit code to your address — no password needed.</p>
+    ${msgHtml()}
+    <form data-form="otp-login-request">
+      <div class="field"><label for="ol-email">Email</label><input id="ol-email" name="email" type="email" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Sending…" : "Send code"}</button>
+    </form>
+    <div class="switch-line"><button type="button" data-nav="login">Back to password sign in</button></div>
+  `;
+}
+function viewOtpLoginCode() {
+  return `
+    <h1 class="title">Enter code</h1>
+    <p class="hint">Sent to ${pendingEmail}. Code expires in 5 minutes.</p>
+    ${msgHtml()}
+    <form data-form="otp-login-verify">
+      <div class="field"><label for="olc-otp">6-digit code</label><input id="olc-otp" name="otp" inputmode="numeric" maxlength="6" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Verifying…" : "Sign in"}</button>
+    </form>
+    <div class="switch-line"><button type="button" data-nav="otp-login">Send a new code</button></div>
+  `;
+}
+function viewSignup() {
+  return `
+    <h1 class="title">Create ${role} account</h1>
+    <p class="hint">This registers a new ${role === "admin" ? "administrator" : "warehouse staff"} login.</p>
+    ${msgHtml()}
+    <form data-form="signup">
+      <div class="field"><label for="su-name">Full name</label><input id="su-name" name="name" required></div>
+      <div class="field"><label for="su-email">Email</label><input id="su-email" name="email" type="email" required></div>
+      <div class="field"><label for="su-password">Password</label><input id="su-password" name="password" type="password" minlength="6" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Creating…" : "Create account"}</button>
+    </form>
+    <div class="switch-line">Already have an account? <button type="button" data-nav="login">Sign in</button></div>
+  `;
+}
+function viewForgot() {
+  return `
+    <h1 class="title">Reset password</h1>
+    <p class="hint">We'll send a one-time code to verify it's you.</p>
+    ${msgHtml()}
+    <form data-form="request-reset-otp">
+      <div class="field"><label for="fp-email">Email</label><input id="fp-email" name="email" type="email" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Sending…" : "Send code"}</button>
+    </form>
+    <div class="switch-line"><button type="button" data-nav="login">Back to sign in</button></div>
+  `;
+}
+function viewReset() {
+  return `
+    <h1 class="title">Enter code</h1>
+    <p class="hint">Sent for ${pendingEmail}. Code expires in 5 minutes.</p>
+    ${msgHtml()}
+    <form data-form="reset-password">
+      <div class="field"><label for="rp-otp">6-digit code</label><input id="rp-otp" name="otp" inputmode="numeric" maxlength="6" required></div>
+      <div class="field"><label for="rp-password">New password</label><input id="rp-password" name="password" type="password" minlength="6" required></div>
+      <button class="btn" type="submit" ${busy ? "disabled" : ""}>${busy ? "Resetting…" : "Reset password"}</button>
+    </form>
+    <div class="switch-line"><button type="button" data-nav="login">Back to sign in</button></div>
+  `;
+}
+function viewSuccess() {
+  const url = lastSession ? dashboardUrlFor(lastSession.token, lastSession.user) : DASHBOARD_URL;
+  return `
+    <div class="success-panel">
+      <div class="glyph">✅</div>
+      <h1 class="title">Signed in as ${role === "admin" ? "Administrator" : "Warehouse Staff"}</h1>
+      <p class="hint">Redirecting you to the Inventory Dashboard.</p>
+      <a class="btn" style="display:block;text-decoration:none;box-sizing:border-box" href="${url}">Go to Dashboard</a>
+      <button class="btn ghost" type="button" data-nav="login">Sign in as someone else</button>
+    </div>
+  `;
+}
+const VIEWS = {
+  login: viewLogin, "otp-login": viewOtpLogin, "otp-login-code": viewOtpLoginCode,
+  signup: viewSignup, forgot: viewForgot, reset: viewReset, success: viewSuccess
+};
+function renderAuth() { document.getElementById("authArea").innerHTML = VIEWS[view](); }
+
+/* =========================================================================
+   FORM HANDLERS — every one of these just calls the backend API in api.js's
+   sibling, ./backend (see server.js). No storage logic lives in this file
+   anymore; the API is the single source of truth.
+   ========================================================================= */
+const FORM_HANDLERS = {
+  async login(form) {
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
+    busy = true; message = null; renderAuth();
+    try {
+      const data = await api("/api/auth/login", { email, password, role });
+      saveSession(data.token, data.user);
+      lastSession = { token: data.token, user: data.user };
+      busy = false; view = "success"; renderAuth();
+      return;
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  },
+
+  async signup(form) {
+    const name = form.name.value.trim();
+    const email = form.email.value.trim().toLowerCase();
+    const password = form.password.value;
+    busy = true; message = null; renderAuth();
+    try {
+      await api("/api/auth/signup", { name, email, password, role });
+      busy = false;
+      message = { type: "ok", text: "Account created. You can now sign in." };
+      view = "login";
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  },
+
+  async "otp-login-request"(form) {
+    const email = form.email.value.trim().toLowerCase();
+    busy = true; message = null; renderAuth();
+    try {
+      await api("/api/auth/request-otp", { email, role, purpose: "login" });
+      busy = false;
+      pendingEmail = email;
+      view = "otp-login-code";
+      message = { type: "ok", text: "Code sent — check your email." };
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  },
+
+  async "otp-login-verify"(form) {
+    const code = form.otp.value.trim();
+    busy = true; message = null; renderAuth();
+    try {
+      const data = await api("/api/auth/verify-otp-login", { email: pendingEmail, role, code });
+      saveSession(data.token, data.user);
+      lastSession = { token: data.token, user: data.user };
+      busy = false; view = "success"; renderAuth();
+      return;
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  },
+
+  async "request-reset-otp"(form) {
+    const email = form.email.value.trim().toLowerCase();
+    busy = true; message = null; renderAuth();
+    try {
+      await api("/api/auth/request-otp", { email, role, purpose: "reset" });
+      busy = false;
+      pendingEmail = email;
+      view = "reset";
+      message = { type: "ok", text: "Code sent — check your email." };
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  },
+
+  async "reset-password"(form) {
+    const code = form.otp.value.trim();
+    const newPassword = form.password.value;
+    busy = true; message = null; renderAuth();
+    try {
+      await api("/api/auth/reset-password", { email: pendingEmail, role, code, newPassword });
+      busy = false;
+      message = { type: "ok", text: "Password reset. Sign in with your new password." };
+      view = "login";
+    } catch (err) {
+      busy = false; message = { type: "error", text: err.message };
+    }
+    renderAuth();
+  }
+};
+
+document.getElementById("authArea").addEventListener("submit", (event) => {
+  const form = event.target.closest("[data-form]");
+  if (!form) return;
+  event.preventDefault();
+  FORM_HANDLERS[form.dataset.form](form);
+});
+document.getElementById("authArea").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-nav]");
+  if (!button) return;
+  view = button.dataset.nav;
+  message = null;
+  renderAuth();
+});
+document.querySelectorAll(".role-toggle button").forEach((button) => {
+  button.addEventListener("click", () => setRole(button.dataset.role));
+});
+
+/* Boot */
+(function init() {
+  document.getElementById("storageNote").textContent =
+    API_BASE.includes("YOUR-BACKEND-URL-HERE")
+      ? "⚠ Set API_BASE in index.html to your deployed backend URL."
+      : "Accounts are stored on the StockSense server.";
+  setRole("staff");
+})();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
