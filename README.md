@@ -7,14 +7,6 @@
 **A centralized inventory platform where every stock movement is traceable, auditable, and derived from a single source of truth.**
 
 
-
-[![Status](https://img.shields.io/badge/status-hackathon%20build-orange?style=flat-square)](#)
-[![Frontend](https://img.shields.io/badge/frontend-HTML%20%2F%20CSS%20%2F%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](#)
-[![Backend](https://img.shields.io/badge/backend-FastAPI-009688?style=flat-square)](#)
-[![Database](https://img.shields.io/badge/database-MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)](#)
-[![ORM](https://img.shields.io/badge/ORM-SQLAlchemy-D71F00?style=flat-square)](#)
-[![Auth](https://img.shields.io/badge/auth-JWT%20%2B%20bcrypt-4B32C3?style=flat-square)](#)
-
 </div>
 
 ---
