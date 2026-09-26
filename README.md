@@ -6,7 +6,7 @@
 
 **A centralized inventory platform where every stock movement is traceable, auditable, and derived from a single source of truth.**
 
-Built for the **Odoo Virtual Hackathon** 🚀
+
 
 [![Status](https://img.shields.io/badge/status-hackathon%20build-orange?style=flat-square)](#)
 [![Frontend](https://img.shields.io/badge/frontend-HTML%20%2F%20CSS%20%2F%20JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](#)
